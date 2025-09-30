@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: spring-ai-gateway-sample
+  redis:
+    host: localhost
+    port: 6379
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/ai_gateway
+    username: ai_gateway
+    password: ai_gateway
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ai_gateway
+    username: ai_gateway
+    password: ai_gateway
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+
+gateway:
+  clients:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      base-url: https://api.openai.com/v1/chat/completions
+      default-model: gpt-4o-mini
+    gemini:
+      api-key: ${GEMINI_API_KEY:}
+      base-url: https://generativelanguage.googleapis.com/v1beta/models
+      default-model: gemini-1.5-flash
+  providers:
+    - id: openai
+      display-name: OpenAI
+      enabled: true
+      models:
+        - id: gpt-4o-mini
+          type: chat
+          capabilities:
+            - chat
+            - reasoning
+          pricing:
+            input-cost: 0.0005
+            output-cost: 0.0015
+            currency: USD
+          fallback-priority:
+            - gemini-1.5-flash
+    - id: gemini
+      display-name: Google Gemini
+      enabled: true
+      models:
+        - id: gemini-1.5-flash
+          type: chat
+          capabilities:
+            - chat
+            - reasoning
+          pricing:
+            input-cost: 0.0004
+            output-cost: 0.0008
+            currency: USD
+          fallback-priority:
+            - gpt-4o-mini
